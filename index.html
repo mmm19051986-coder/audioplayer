@@ -1,0 +1,128 @@
+<div id="FX_ROOT">
+<style>
+#FX_ROOT{
+  font-family: Inter, Arial;
+  color:#fff;
+}
+#EDITOR{
+  display:flex;
+  gap:12px;
+  margin-bottom:12px;
+}
+#EDITOR input, #EDITOR textarea, #EDITOR select, #EDITOR button{
+  background:#111;
+  color:#fff;
+  border:1px solid #333;
+  padding:6px;
+  border-radius:6px;
+}
+#PREVIEW{
+  width:360px;
+  padding:14px;
+  border-radius:16px;
+  background:rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+}
+.player-cover{
+  width:100%;
+  height:160px;
+  background-size:cover;
+  background-position:center;
+  border-radius:12px;
+}
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-top:10px;
+}
+.controls button{
+  background:#fff;
+  color:#000;
+  border:none;
+  border-radius:50%;
+  width:42px;
+  height:42px;
+  cursor:pointer;
+}
+.progress{
+  width:100%;
+  height:6px;
+  background:#444;
+  border-radius:4px;
+  margin-top:10px;
+}
+.progress span{
+  display:block;
+  height:100%;
+  width:0%;
+  background:#6cf;
+  border-radius:4px;
+}
+#CODE_OUT{
+  width:100%;
+  height:180px;
+  margin-top:10px;
+  background:#000;
+  color:#0f0;
+}
+</style>
+
+<div id="EDITOR">
+  <input id="cover" placeholder="Cover image URL">
+  <textarea id="tracks" placeholder="Raw links, one per line"></textarea>
+  <button onclick="build()">Получить код</button>
+</div>
+
+<div id="PREVIEW">
+  <div class="player-cover" id="pvCover"></div>
+  <div id="pvTitle">—</div>
+  <div class="progress"><span id="pvBar"></span></div>
+  <div class="controls">
+    <button onclick="prev()">⏮</button>
+    <button onclick="toggle()">▶</button>
+    <button onclick="next()">⏭</button>
+  </div>
+</div>
+
+<textarea id="CODE_OUT"></textarea>
+
+<script>
+let audio=new Audio();
+let list=[];
+let index=0;
+
+function load(){
+  audio.src=list[index];
+  document.getElementById('pvTitle').textContent=
+    list[index].split('/').pop();
+}
+function toggle(){
+  audio.paused?audio.play():audio.pause();
+}
+function next(){
+  index=(index+1)%list.length;
+  load(); audio.play();
+}
+function prev(){
+  index=(index-1+list.length)%list.length;
+  load(); audio.play();
+}
+audio.ontimeupdate=()=>{
+  pvBar.style.width=(audio.currentTime/audio.duration*100||0)+'%';
+};
+
+function build(){
+  list=document.getElementById('tracks').value
+    .split('\n').filter(Boolean);
+  if(!list.length)return alert('Нет треков');
+  document.getElementById('pvCover').style.backgroundImage=
+    `url(${cover.value})`;
+  load();
+
+  CODE_OUT.value=`<div style="background:transparent">
+<audio src="${list[0]}" controls></audio>
+</div>`;
+}
+</script>
+</div>
